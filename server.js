@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 
 // MongoDB connection URI from environment variable
-const uri = process.env.MONGODB_URI;
+const uri = "mongodb+srv://angelesedgardo17:dNjeAKovMY0psOmU@depedinfostorage.mddyf.mongodb.net/?retryWrites=true&w=majority&appName=depedinfostorage";
 
 // Check if the MongoDB URI is defined
 if (!uri) {
