@@ -8,8 +8,13 @@ const app = express();
 const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 
 // MongoDB connection URI from environment variable
-
 const uri = process.env.MONGODB_URI;
+
+// Check if the MongoDB URI is defined
+if (!uri) {
+  console.error('MongoDB URI is not defined. Please set the MONGODB_URI environment variable.');
+  process.exit(1); // Exit the application if the URI is not defined
+}
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,7 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/fetch-data', async (req, res) => {
   try {
     const db = client.db('myusers'); // Replace with your database name
-    const data = await db.collection('students').find({}).toArray(); // Fetch all documents from the 'student' collection
+    const data = await db.collection('students').find({}).toArray(); // Fetch all documents from the 'students' collection
 
     if (data.length === 0) {
       return res.status(404).send('No data found');
@@ -42,7 +47,7 @@ app.get('/fetch-data', async (req, res) => {
   }
 });
 
-// Add a new student to the 'student' collection
+// Add a new student to the 'students' collection
 app.post('/add-student', async (req, res) => {
   const { firstname, middlename, lastname, birthdate, sex } = req.body;
 
@@ -60,7 +65,7 @@ app.post('/add-student', async (req, res) => {
       sex,
     };
 
-    await db.collection('students').insertOne(newStudent); // Insert into 'student' collection
+    await db.collection('students').insertOne(newStudent); // Insert into 'students' collection
     res.status(201).send('New student added successfully');
   } catch (error) {
     console.error('Error adding student:', error);
@@ -79,7 +84,7 @@ async function run() {
       console.log(`Server running at http://localhost:${port}`);
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error connecting to MongoDB:', error);
   }
 }
 
