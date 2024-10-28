@@ -23,7 +23,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 // Fetch data from a collection
 app.get('/fetch-data', async (req, res) => {
   const { collectionName } = req.query; // Get collection name from query parameters
@@ -70,6 +69,33 @@ app.post('/add-field', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error adding field');
+  }
+});
+
+// Add a new student to the collection
+app.post('/add-student', async (req, res) => {
+  const { firstname, middlename, lastname, birthdate, sex } = req.body;
+
+  // Validate the incoming data
+  if (!firstname || !middlename || !lastname || !birthdate || !sex) {
+    return res.status(400).send('All fields are required');
+  }
+
+  try {
+    const db = client.db('myusers'); // Replace with your database name
+    const newStudent = {
+      firstname,
+      middlename,
+      lastname,
+      birthdate,
+      sex,
+    };
+
+    const result = await db.collection('student').insertOne(newStudent); // Use your collection name
+    res.status(201).json({ message: 'Student added successfully', id: result.insertedId });
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).send('Error adding student');
   }
 });
 
