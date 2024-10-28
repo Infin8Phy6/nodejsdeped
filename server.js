@@ -2,19 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const cors = require('cors');
-require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
-const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
+const port = 3000;
 
-// MongoDB connection URI from environment variable
+// MongoDB connection URI
 const uri = "mongodb+srv://angelesedgardo17:dNjeAKovMY0psOmU@depedinfostorage.mddyf.mongodb.net/?retryWrites=true&w=majority&appName=depedinfostorage";
-
-// Check if the MongoDB URI is defined
-if (!uri) {
-  console.error('MongoDB URI is not defined. Please set the MONGODB_URI environment variable.');
-  process.exit(1); // Exit the application if the URI is not defined
-}
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -30,11 +23,18 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 // Fetch data from a collection
 app.get('/fetch-data', async (req, res) => {
+  const { collectionName } = req.query; // Get collection name from query parameters
+
+  if (!collectionName) {
+    return res.status(400).send('Collection name is required');
+  }
+
   try {
     const db = client.db('myusers'); // Replace with your database name
-    const data = await db.collection('students').find({}).toArray(); // Fetch all documents from the 'students' collection
+    const data = await db.collection(collectionName).find({}).toArray(); // Fetch all documents
 
     if (data.length === 0) {
       return res.status(404).send('No data found');
@@ -47,29 +47,29 @@ app.get('/fetch-data', async (req, res) => {
   }
 });
 
-// Add a new student to the 'students' collection
-app.post('/add-student', async (req, res) => {
-  const { firstname, middlename, lastname, birthdate, sex } = req.body;
-
-  if (!firstname || !lastname || !birthdate || !sex) {
-    return res.status(400).send('First name, last name, birthdate, and sex are required');
-  }
+// Add a new field to a collection
+app.post('/add-field', async (req, res) => {
+  const { collectionName, fieldName, fieldValue } = req.body;
 
   try {
-    const db = client.db('myusers');
-    const newStudent = {
-      firstname,
-      middlename: middlename || null,
-      lastname,
-      birthdate,
-      sex,
-    };
+    const db = client.db('myusers'); // Replace with your database name
+    const result = await db.collection(collectionName).updateMany(
+      {}, // Match all documents
+      { $set: { [fieldName]: fieldValue } }
+    );
 
-    await db.collection('students').insertOne(newStudent); // Insert into 'students' collection
-    res.status(201).send('New student added successfully');
+    if (result.modifiedCount === 0) {
+      // If no documents were modified, insert a new document
+      await db.collection(collectionName).insertOne({
+        [fieldName]: fieldValue,
+      });
+      res.status(200).send(`No documents found. Added new document with field ${fieldName}.`);
+    } else {
+      res.status(200).send(`Added field ${fieldName} to ${result.modifiedCount} documents.`);
+    }
   } catch (error) {
-    console.error('Error adding student:', error);
-    res.status(500).send('Error adding student');
+    console.error(error);
+    res.status(500).send('Error adding field');
   }
 });
 
@@ -84,7 +84,7 @@ async function run() {
       console.log(`Server running at http://localhost:${port}`);
     });
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error(error);
   }
 }
 
