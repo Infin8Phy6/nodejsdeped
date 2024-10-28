@@ -8,6 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 
 // MongoDB connection URI from environment variable
+
 const uri = process.env.MONGODB_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
