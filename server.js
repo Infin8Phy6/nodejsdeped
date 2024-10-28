@@ -23,17 +23,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Fetch data from a collection
+// Fetch data from the "students" collection
 app.get('/fetch-data', async (req, res) => {
-  const { collectionName } = req.query; // Get collection name from query parameters
-
-  if (!collectionName) {
-    return res.status(400).send('Collection name is required');
-  }
-
   try {
     const db = client.db('myusers'); // Replace with your database name
-    const data = await db.collection(collectionName).find({}).toArray(); // Fetch all documents
+    const data = await db.collection('students').find({}).toArray(); // Fetch all documents from "students" collection
 
     if (data.length === 0) {
       return res.status(404).send('No data found');
@@ -46,20 +40,20 @@ app.get('/fetch-data', async (req, res) => {
   }
 });
 
-// Add a new field to a collection
+// Add a new field to the "students" collection
 app.post('/add-field', async (req, res) => {
-  const { collectionName, fieldName, fieldValue } = req.body;
+  const { fieldName, fieldValue } = req.body;
 
   try {
     const db = client.db('myusers'); // Replace with your database name
-    const result = await db.collection(collectionName).updateMany(
+    const result = await db.collection('students').updateMany(
       {}, // Match all documents
       { $set: { [fieldName]: fieldValue } }
     );
 
     if (result.modifiedCount === 0) {
       // If no documents were modified, insert a new document
-      await db.collection(collectionName).insertOne({
+      await db.collection('students').insertOne({
         [fieldName]: fieldValue,
       });
       res.status(200).send(`No documents found. Added new document with field ${fieldName}.`);
@@ -72,7 +66,7 @@ app.post('/add-field', async (req, res) => {
   }
 });
 
-// Add a new student to the collection
+// Add a new student to the "students" collection
 app.post('/add-student', async (req, res) => {
   const { firstname, middlename, lastname, birthdate, sex } = req.body;
 
@@ -91,7 +85,7 @@ app.post('/add-student', async (req, res) => {
       sex,
     };
 
-    const result = await db.collection('student').insertOne(newStudent); // Use your collection name
+    const result = await db.collection('students').insertOne(newStudent); // Use "students" collection
     res.status(201).json({ message: 'Student added successfully', id: result.insertedId });
   } catch (error) {
     console.error('Error adding student:', error);
@@ -107,7 +101,7 @@ async function run() {
 
     // Start the server
     app.listen(port, () => {
-      console.log(`Server running at ${port}`);
+      console.log(`Server running at http://localhost:${port}`); // Update this line if needed for production
     });
   } catch (error) {
     console.error(error);
