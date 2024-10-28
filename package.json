@@ -2,17 +2,21 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
+  "description": "A Node.js backend server",
   "author": "",
   "license": "ISC",
-  "description": "",
+  "keywords": [],
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.3"
+  },
+  "engines": {
+    "node": ">=16"
   }
 }
